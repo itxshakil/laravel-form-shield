@@ -1,0 +1,92 @@
+name: CI
+
+on:
+    push:
+        branches: ["main"]
+    pull_request:
+        branches: ["main"]
+
+concurrency:
+    group: ci-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    lint:
+        name: Lint (Pint)
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 8.4
+                  tools: composer
+                  coverage: none
+            - uses: ramsey/composer-install@v3
+            - run: vendor/bin/pint --test
+            - name: Lint GitHub Actions workflows
+              uses: raven-actions/actionlint@v2
+
+    analyse:
+        name: Static Analysis (PHPStan, level max)
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 8.4
+                  tools: composer
+                  coverage: none
+            - uses: ramsey/composer-install@v3
+            - run: php -d memory_limit=1G vendor/bin/phpstan analyse --no-progress
+
+    packagist:
+        name: Composer / Packagist Validation
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 8.4
+                  tools: composer
+                  coverage: none
+            - run: composer validate --strict
+            - run: composer dump-autoload --dry-run --optimize
+
+    test:
+        name: Tests (PHP ${{ matrix.php }} | Laravel ${{ matrix.laravel }} | ${{ matrix.deps }})
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                php: ["8.2", "8.3", "8.4", "8.5"]
+                laravel: ["12.*", "13.*"]
+                deps: [lowest, highest]
+                exclude:
+                    # Laravel 13 requires PHP 8.3+.
+                    - php: "8.2"
+                      laravel: "13.*"
+        steps:
+            - uses: actions/checkout@v4
+            - uses: shivammathur/setup-php@v2
+              with:
+                  php-version: ${{ matrix.php }}
+                  extensions: dom, mbstring, intl, pdo_sqlite, sqlite3
+                  tools: composer
+                  coverage: none
+            - name: Pin Laravel version
+              run: composer require "laravel/framework:${{ matrix.laravel }}" --no-update --no-interaction
+            - uses: ramsey/composer-install@v3
+              with:
+                  dependency-versions: ${{ matrix.deps }}
+            - run: vendor/bin/phpunit
+
+    js:
+        name: Tests (shield script)
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+            - run: npm install --no-audit --no-fund
+            - run: npm test

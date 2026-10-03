@@ -1,0 +1,83 @@
+core:
+    - changed-files:
+          - any-glob-to-any-file:
+                - src/Inspector.php
+                - src/FormShield.php
+                - src/Verdict.php
+                - src/Submission.php
+                - src/Profile.php
+                - src/Token.php
+                - src/SignalRegistry.php
+
+signals:
+    - changed-files:
+          - any-glob-to-any-file:
+                - src/Signals/**
+                - src/Exemptions/**
+                - src/Dns/**
+                - src/Rules/**
+
+integrations:
+    - changed-files:
+          - any-glob-to-any-file:
+                - src/Livewire/**
+                - src/Http/**
+                - src/View/**
+                - resources/**
+
+console:
+    - changed-files:
+          - any-glob-to-any-file:
+                - src/Console/**
+
+config:
+    - changed-files:
+          - any-glob-to-any-file:
+                - config/form-shield.php
+                - src/Database/**
+
+events:
+    - changed-files:
+          - any-glob-to-any-file:
+                - src/Events/**
+
+tests:
+    - changed-files:
+          - any-glob-to-any-file:
+                - tests/**
+                - phpunit.xml.dist
+
+documentation:
+    - changed-files:
+          - any-glob-to-any-file:
+                - README.md
+                - CHANGELOG.md
+                - docs/**
+
+ci:
+    - changed-files:
+          - any-glob-to-any-file:
+                - .github/workflows/**
+                - .github/labeler.yml
+
+tooling:
+    - changed-files:
+          - any-glob-to-any-file:
+                - phpstan.neon.dist
+                - pint.json
+                - .editorconfig
+                - package.json
+
+dependencies:
+    - changed-files:
+          - any-glob-to-any-file:
+                - composer.json
+
+meta:
+    - changed-files:
+          - any-glob-to-any-file:
+                - .github/**
+                - .gitignore
+                - .gitattributes
+
+# `breaking-change` is applied by hand on PRs that change public behaviour.

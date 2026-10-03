@@ -1,0 +1,35 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+/**
+ * Laravel Form Shield's built-in submissions log: for apps that don't store
+ * their form posts anywhere, so quarantined messages can still be reviewed
+ * and the report has rows to measure.
+ */
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('form_shield_submissions', function (Blueprint $table) {
+            $table->id();
+            $table->string('profile', 64)->index();
+            $table->string('email')->nullable()->index();
+            $table->text('payload')->nullable();
+            $table->string('ip', 45)->nullable();
+            $table->string('user_agent', 512)->nullable();
+            $table->nullableMorphs('subject');
+            $table->spamColumns();
+            $table->timestamps();
+
+            $table->index(['is_spam', 'reviewed_at']);
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('form_shield_submissions');
+    }
+};

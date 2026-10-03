@@ -1,0 +1,92 @@
+{
+    "name": "itxshakil/laravel-form-shield",
+    "description": "CAPTCHA-free spam scoring for Laravel forms: quarantine instead of reject, keep every verdict, and tune your rules against human-labelled data.",
+    "keywords": [
+        "laravel",
+        "laravel-package",
+        "spam",
+        "anti-spam",
+        "spam-protection",
+        "honeypot",
+        "captcha",
+        "captcha-alternative",
+        "no-captcha",
+        "forms",
+        "contact-form",
+        "livewire",
+        "inertia",
+        "bot-protection",
+        "rate-limiting"
+    ],
+    "homepage": "https://github.com/itxshakil/laravel-form-shield",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Shakil Alam",
+            "email": "itxshakil@gmail.com",
+            "role": "Developer",
+            "homepage": "https://github.com/itxshakil"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/itxshakil/laravel-form-shield/issues",
+        "source": "https://github.com/itxshakil/laravel-form-shield",
+        "docs": "https://github.com/itxshakil/laravel-form-shield/tree/main/docs"
+    },
+    "funding": [
+        {
+            "type": "github",
+            "url": "https://github.com/sponsors/itxshakil"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "laravel/framework": "^12.0|^13.0"
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.18",
+        "orchestra/testbench": "^10.0|^11.0",
+        "phpunit/phpunit": "^11.5|^12.0"
+    },
+    "suggest": {
+        "livewire/livewire": "Use the WithFormShield trait to protect Livewire forms (^3.0)."
+    },
+    "autoload": {
+        "psr-4": {
+            "Itxshakil\\FormShield\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Itxshakil\\FormShield\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "analyse": "phpstan analyse --memory-limit=1G",
+        "format": "pint",
+        "lint": "pint --test",
+        "qa": [
+            "@lint",
+            "@analyse",
+            "@test"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Itxshakil\\FormShield\\FormShieldServiceProvider"
+            ],
+            "aliases": {
+                "FormShield": "Itxshakil\\FormShield\\Facades\\FormShield"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

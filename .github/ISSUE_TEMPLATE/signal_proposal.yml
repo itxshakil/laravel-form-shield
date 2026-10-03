@@ -1,0 +1,22 @@
+name: Signal proposal
+description: Suggest a new built-in signal
+labels: [signal]
+body:
+  - type: textarea
+    id: pattern
+    attributes:
+      label: What spam pattern does it catch?
+    validations:
+      required: true
+  - type: textarea
+    id: innocent
+    attributes:
+      label: Innocent explanations
+      description: When would a real person trigger it?
+    validations:
+      required: true
+  - type: textarea
+    id: data
+    attributes:
+      label: Evidence
+      description: Precision from `form-shield:report` on real traffic, if you have it, with sample size.

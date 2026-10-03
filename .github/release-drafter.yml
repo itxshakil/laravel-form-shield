@@ -1,0 +1,59 @@
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+
+version-resolver:
+    major:
+        labels:
+            - breaking-change
+    minor:
+        labels:
+            - feature
+            - signals
+            - core
+            - integrations
+            - console
+            - config
+            - events
+    patch:
+        labels:
+            - bug
+            - fix
+            - dependencies
+            - docs
+            - documentation
+            - ci
+            - tooling
+            - tests
+            - meta
+    default: patch
+
+categories:
+    - title: "🚀 New Features"
+      labels: [feature, core, integrations, console, config, events]
+    - title: "🛡️ Signals"
+      labels: [signals]
+    - title: "🐛 Bug Fixes"
+      labels: [bug, fix]
+    - title: "🧪 Tests"
+      labels: [tests]
+    - title: "🔧 CI / Tooling"
+      labels: [ci, tooling]
+    - title: "⬆️ Dependencies"
+      labels: [dependencies]
+    - title: "📚 Documentation"
+      labels: [docs, documentation]
+    - title: "🧹 Maintenance"
+      labels: [meta]
+    - title: "⚠️ Breaking Changes"
+      labels: [breaking-change]
+
+change-template: "- $TITLE (#$NUMBER) @$AUTHOR"
+
+template: |
+    ## Changes
+
+    $CHANGES
+
+exclude:
+    labels:
+        - skip-changelog
