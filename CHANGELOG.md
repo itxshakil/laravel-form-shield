@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+- Dev tooling: jsdom 25 → 30 for the JS tests.
+- CI: a single `CI passed` check that summarises every job, for branch protection.
+- Dependabot PRs for CI actions and dev-only npm tooling merge themselves once CI passes.
+
 ## [1.0.1] - 2026-10-03
 
 ### Changed

@@ -7,6 +7,24 @@
 3. In the repo settings, add the topics: `laravel`, `laravel-package`, `spam-protection`, `honeypot`, `captcha-alternative`, `anti-spam`, `livewire`, `php`.
 4. Create these labels so the labeler and release-drafter work: `core`, `signals`, `integrations`, `console`, `config`, `events`, `tests`, `documentation`, `ci`, `tooling`, `dependencies`, `meta`, `breaking-change`, `skip-changelog`, `question`.
 
+## One-time repo settings (keeps Dependabot hands-off)
+
+Run once, with the `gh` CLI logged in with the `workflow` scope (`gh auth refresh -h github.com -s workflow && gh auth setup-git`):
+
+```bash
+gh repo edit --enable-auto-merge --delete-branch-on-merge
+gh api -X PUT repos/itxshakil/laravel-form-shield/branches/main/protection --input - <<'JSON'
+{
+  "required_status_checks": { "strict": false, "contexts": ["CI passed"] },
+  "enforce_admins": false,
+  "required_pull_request_reviews": null,
+  "restrictions": null
+}
+JSON
+```
+
+After that, Dependabot's monthly PRs for GitHub Actions and the npm test tooling merge themselves when CI is green. `enforce_admins: false` means you can still push straight to `main`.
+
 ## Each release
 
 1. Make sure CI on `main` is green.
