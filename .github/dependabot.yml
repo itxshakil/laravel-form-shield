@@ -1,6 +1,19 @@
 version: 2
 updates:
+  # One grouped PR a month for every GitHub Action, instead of one PR per action.
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  # The JS test tooling (jsdom). Dev-only: it never ships with the package.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      npm-dev:
+        dependency-type: development

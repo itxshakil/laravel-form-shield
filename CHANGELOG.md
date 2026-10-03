@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-03
+
+### Changed
+- CI: updated `actions/checkout` and `actions/setup-node` to v7, `ramsey/composer-install` to v4, `actions/labeler` to v7 and `release-drafter` to v7. Removes the Node.js 20 deprecation warnings on every job. The JS tests now run on Node 24.
+- Dependabot now opens one grouped PR a month for GitHub Actions, plus one for the npm dev tooling, instead of one PR per update.
+
+No changes to the package code.
+
 ## [1.0.0] - 2026-10-03
 
 First release. It ships what was planned as 1.0, 1.1 and 1.2 in a single version.
@@ -42,5 +50,6 @@ First release. It ships what was planned as 1.0, 1.1 and 1.2 in a single version
 - Per-profile daily and global hourly caps per IP, with an IPv4/IPv6 CIDR allowlist and a `rate_limited` verdict (a 429 from the middleware).
 - Events: `SubmissionInspected`, `SubmissionQuarantined`, `SubmissionReviewed`.
 
-[Unreleased]: https://github.com/itxshakil/laravel-form-shield/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/itxshakil/laravel-form-shield/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/itxshakil/laravel-form-shield/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/itxshakil/laravel-form-shield/releases/tag/v1.0.0
