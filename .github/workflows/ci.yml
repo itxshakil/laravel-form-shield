@@ -21,7 +21,7 @@ jobs:
                   php-version: 8.4
                   tools: composer
                   coverage: none
-            - uses: ramsey/composer-install@v3
+            - uses: ramsey/composer-install@v4
             - run: vendor/bin/pint --test
             - name: Lint GitHub Actions workflows
               uses: raven-actions/actionlint@v2
@@ -36,7 +36,7 @@ jobs:
                   php-version: 8.4
                   tools: composer
                   coverage: none
-            - uses: ramsey/composer-install@v3
+            - uses: ramsey/composer-install@v4
             - run: php -d memory_limit=1G vendor/bin/phpstan analyse --no-progress
 
     packagist:
@@ -75,7 +75,7 @@ jobs:
                   coverage: none
             - name: Pin Laravel version
               run: composer require "laravel/framework:${{ matrix.laravel }}" --no-update --no-interaction
-            - uses: ramsey/composer-install@v3
+            - uses: ramsey/composer-install@v4
               with:
                   dependency-versions: ${{ matrix.deps }}
             - run: vendor/bin/phpunit
