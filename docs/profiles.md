@@ -42,11 +42,31 @@ use Itxshakil\FormShield\Enums\BuiltInSignal;
 
 ## What a profile can override
 
-Any top-level key that shapes a verdict: `threshold`, `weights`, `inputs`, `min_seconds`, `max_age_seconds`, `allowed_fields`, `allowed_scripts`, `disposable_domains`, `email_dns_check`, `duplicate_window_seconds`, `exemption`, `rate_limits`, plus `signals`.
+Any top-level key that shapes a verdict: `threshold`, `weights`, `inputs`, `min_seconds`, `max_age_seconds`, `requires_token`, `allowed_fields`, `allowed_scripts`, `disposable_domains`, `email_dns_check`, `duplicate_window_seconds`, `exemption`, `content`, `rate_limits`, plus `signals`.
 
-`weights`, `inputs`, `exemption` and `rate_limits` are **merged** with the top-level values, so you only list what changes. Everything else is replaced.
+`weights`, `inputs`, `exemption`, `content` and `rate_limits` are **merged** with the top-level values, so you only list what changes. Everything else is replaced.
 
 `signals` is a list of the soft signals that run for this profile. Leave it out to run all of them. Hard signals always run.
+
+## Forms without a token
+
+Some forms are not rendered by your app, such as a lead form on a customer's own website.
+They cannot carry the token fields, so every post would be flagged `no_token`.
+Set `requires_token` to `false` on a profile for those forms:
+
+```php
+'profiles' => [
+    'embedded_lead' => [
+        'requires_token' => false,
+        'content' => ['signals' => true],
+    ],
+],
+```
+
+The default is `true`, which is the behaviour of v1.
+With it off, the token, `expired` and `too_fast` checks are skipped and `no_js` never fires.
+The honeypot still applies whenever its field is present in the post, and every other signal runs as usual.
+Without the timing checks you lose a strong bot tell, so pair this with a rate limit and the [content signals](signals.md#content-signals).
 
 ## Unknown profiles fail loudly
 

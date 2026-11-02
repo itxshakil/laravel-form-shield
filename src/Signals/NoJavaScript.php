@@ -14,6 +14,8 @@ use Itxshakil\FormShield\Submission;
  * without focusing or typing, leaves the field empty.
  *
  * It's soft on purpose. Real people browse with scripts blocked.
+ *
+ * A profile with `requires_token` off has no script to run, so it never fires.
  */
 final class NoJavaScript implements Signal
 {
@@ -24,6 +26,10 @@ final class NoJavaScript implements Signal
 
     public function fires(Submission $submission, Profile $profile): bool
     {
+        if (! $profile->bool('requires_token', true)) {
+            return false;
+        }
+
         $marker = $submission->string($profile->field('js'));
 
         return $marker === '' || $marker !== $submission->string($profile->field('timestamp'));

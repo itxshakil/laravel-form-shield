@@ -72,6 +72,36 @@ final class ColumnsCommandTest extends TestCase
     }
 
     #[Test]
+    public function no_index_writes_a_migration_that_leaves_out_the_is_spam_index(): void
+    {
+        $this->artisan('form-shield:columns', ['table' => 'leads', '--no-index' => true, '--no-interaction' => true])->assertSuccessful();
+
+        $files = $this->written();
+        self::assertCount(1, $files);
+        self::assertStringContainsString('spamColumns(false)', (string) file_get_contents($files[0]));
+        self::assertStringContainsString('dropSpamColumns(false)', (string) file_get_contents($files[0]));
+
+        $migration = require $files[0];
+        self::assertInstanceOf(Migration::class, $migration);
+
+        $migration->up();
+        self::assertTrue(Schema::hasColumn('leads', 'is_spam'));
+        self::assertFalse(Schema::hasIndex('leads', ['is_spam']));
+
+        $migration->down();
+        self::assertFalse(Schema::hasColumn('leads', 'is_spam'));
+    }
+
+    #[Test]
+    public function the_default_migration_keeps_the_index(): void
+    {
+        $this->artisan('form-shield:columns', ['table' => 'leads', '--migrate' => true])->assertSuccessful();
+
+        self::assertTrue(Schema::hasIndex('leads', ['is_spam']));
+        self::assertStringContainsString('spamColumns()', (string) file_get_contents($this->written()[0]));
+    }
+
+    #[Test]
     public function it_does_not_write_a_second_migration_for_the_same_table(): void
     {
         $this->artisan('form-shield:columns', ['table' => 'leads', '--no-interaction' => true])->assertSuccessful();

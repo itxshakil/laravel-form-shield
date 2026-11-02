@@ -34,6 +34,12 @@ final class KnownSenderExemption implements SenderExemption
             return false;
         }
 
-        return $model::query()->where($column, $email)->exists();
+        $query = $model::query();
+
+        if ($profile->bool('exemption.without_global_scopes')) {
+            $query->withoutGlobalScopes();
+        }
+
+        return $query->where($column, $email)->exists();
     }
 }

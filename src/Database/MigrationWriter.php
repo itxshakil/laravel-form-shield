@@ -24,7 +24,7 @@ final class MigrationWriter
      * Validate the table, then write the migration adding the spam columns.
      * The name is checked before anything touches the database or disk.
      */
-    public function spamColumns(string $table, ?string $directory = null): ColumnsResult
+    public function spamColumns(string $table, ?string $directory = null, bool $index = true): ColumnsResult
     {
         if (! self::isValidTableName($table)) {
             return new ColumnsResult(ColumnsOutcome::InvalidName, $table);
@@ -46,7 +46,7 @@ final class MigrationWriter
         $path = $this->write(
             'add_spam_columns_to_'.$table.'_table',
             __DIR__.'/../../stubs/add_spam_columns.php.stub',
-            ['{{ table }}' => $table],
+            ['{{ table }}' => $table, '{{ index }}' => $index ? '' : 'false'],
             $directory,
         );
 

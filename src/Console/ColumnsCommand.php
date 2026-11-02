@@ -17,13 +17,14 @@ final class ColumnsCommand extends Command
 
     protected $signature = 'form-shield:columns
         {table : The table that stores your form submissions}
+        {--no-index : Leave out the is_spam index, for tables whose index is built concurrently in its own migration}
         {--migrate : Run the migration straight away (skipped if the table does not exist yet)}';
 
     protected $description = 'Create a migration that adds the spam verdict columns to an existing table';
 
     public function handle(MigrationWriter $writer): int
     {
-        $result = $writer->spamColumns(trim($this->argument('table')));
+        $result = $writer->spamColumns(trim($this->argument('table')), index: ! $this->option('no-index'));
 
         if (! $this->reportColumnsResult($result)) {
             return self::FAILURE;

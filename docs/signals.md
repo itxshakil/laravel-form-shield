@@ -27,6 +27,11 @@ Each one adds its weight when it fires. Default threshold: **4**. The names are 
 | `url_in_name` | 3 | The name field contains `http(s)://` or `www.`. | Almost none. |
 | `gibberish` | 2 | A word of 8+ ASCII letters in the name or message has a 6+ consonant cluster, or flips case 4+ times (`xKqLmPzRw`). | Some non-English names; product codes. |
 | `unexpected_fields` | 2 | The submission has keys outside `allowed_fields`. Off unless that list is set. | Browser extensions that inject fields. |
+| `excessive_links` | 2 | The message holds more than `content.max_links` links. Off unless `content.signals` is true. | Someone pasting their own pages. |
+| `link_markup` | 3 | The message holds `<a href`, `[url` or `[link`. Off unless `content.signals` is true. | Someone pasting HTML from their own site. |
+| `blocked_phrase` | 3 | The message holds a phrase from `content.phrases`, case-insensitive. Off unless `content.signals` is true. | A phrase that is too general; keep the list to multi-word phrases. |
+
+`no_js` never fires on a profile with `requires_token` off, because such a form has no script to run.
 
 ## Deferred signals
 
@@ -35,6 +40,10 @@ Each one adds its weight when it fires. Default threshold: **4**. The names are 
 ## The known-sender exemption
 
 When `exemption.enabled` is true and the submitted email matches `exemption.column` on `exemption.model`, soft scoring is skipped. The verdict is clean and its signal map is `['known_sender' => 0]`. The zero weight keeps it out of the report's precision table.
+
+By default the lookup runs through the model's global scopes.
+If a tenant or soft-delete scope hides the row from the form's request, set `exemption.without_global_scopes` to `true` and the lookup runs with `withoutGlobalScopes()`.
+It is `false` by default, which is the behaviour of v1.
 
 Bind your own `Itxshakil\FormShield\Contracts\SenderExemption` to change the rule, for example to check a CRM, or to exempt logged-in users.
 
@@ -52,3 +61,13 @@ Bind your own `Itxshakil\FormShield\Contracts\SenderExemption` to change the rul
 ```
 
 Grow the phrase list from what you actually receive, not from imagination. Every entry is a chance to turn away a paying customer, so use multi-word phrases only.
+
+## Content signals
+
+A form that cannot show a validation error, such as a lead form posted from another site, cannot use the rule above.
+Set `content.signals` to `true` and the same three checks run as soft signals instead: `excessive_links`, `link_markup` and `blocked_phrase`.
+They are registered like any other soft signal, so a profile's `signals` list and `weights` apply to them.
+They are off by default, which is the behaviour of v1.
+
+The rule and the signals share one implementation (`Itxshakil\FormShield\Support\Content`), so they always agree about what counts as a link, as markup or as a blocked phrase.
+Reading `content` from a profile merges it with the top-level values, so a profile can turn the signals on without repeating the phrase list.

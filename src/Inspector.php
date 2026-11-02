@@ -22,7 +22,9 @@ use Itxshakil\FormShield\Support\Value;
  *
  *   1. Rate caps. A flood is answered before any work is spent on it.
  *   2. Hard signals: honeypot, missing or forged token, expiry, too fast, then
- *      any custom hard signals. Each one decides on its own.
+ *      any custom hard signals. Each one decides on its own. A profile with
+ *      `requires_token` off skips the token, expiry and too-fast checks, for
+ *      forms the app cannot render; the honeypot still applies.
  *   3. The known-sender exemption. It comes after the hard signals because
  *      customer email addresses are cheap to scrape. If it came first, any
  *      bot with a scraped address would skip every check.
@@ -73,20 +75,22 @@ final class Inspector implements InspectorContract
             return Verdict::flagged(Reason::Honeypot, profile: $profile->name);
         }
 
-        $startedAt = $this->token->read($submission->string($profile->field('timestamp')));
+        if ($profile->bool('requires_token', true)) {
+            $startedAt = $this->token->read($submission->string($profile->field('timestamp')));
 
-        if ($startedAt === null) {
-            return Verdict::flagged(Reason::NoToken, profile: $profile->name);
-        }
+            if ($startedAt === null) {
+                return Verdict::flagged(Reason::NoToken, profile: $profile->name);
+            }
 
-        $elapsed = Carbon::now()->getTimestamp() - $startedAt;
+            $elapsed = Carbon::now()->getTimestamp() - $startedAt;
 
-        if ($elapsed > $profile->int('max_age_seconds', 43200)) {
-            return Verdict::expired($profile->name);
-        }
+            if ($elapsed > $profile->int('max_age_seconds', 43200)) {
+                return Verdict::expired($profile->name);
+            }
 
-        if ($elapsed < $profile->int('min_seconds', 3)) {
-            return Verdict::flagged(Reason::TooFast, profile: $profile->name);
+            if ($elapsed < $profile->int('min_seconds', 3)) {
+                return Verdict::flagged(Reason::TooFast, profile: $profile->name);
+            }
         }
 
         foreach ($this->signals->hard() as $signal) {

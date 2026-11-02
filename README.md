@@ -74,6 +74,8 @@ php artisan form-shield:columns inquiries
 php artisan migrate
 ```
 
+Add `--no-index` if you build the `is_spam` index yourself, for example concurrently.
+
 Then add the trait to the model:
 
 ```php

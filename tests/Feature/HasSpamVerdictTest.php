@@ -37,6 +37,24 @@ final class HasSpamVerdictTest extends TestCase
     }
 
     #[Test]
+    public function spam_columns_without_index_leaves_out_the_is_spam_index(): void
+    {
+        self::assertTrue(Schema::hasIndex('inquiries', ['is_spam']));
+
+        Schema::create('leads', static function (Blueprint $table): void {
+            $table->id();
+            $table->spamColumns(false);
+        });
+
+        self::assertTrue(Schema::hasColumn('leads', 'is_spam'));
+        self::assertFalse(Schema::hasIndex('leads', ['is_spam']));
+
+        Schema::table('leads', static fn (Blueprint $table) => $table->dropSpamColumns(false));
+
+        self::assertFalse(Schema::hasColumn('leads', 'is_spam'));
+    }
+
+    #[Test]
     public function the_drop_macro_removes_them(): void
     {
         Schema::table('inquiries', static fn (Blueprint $table) => $table->dropSpamColumns());

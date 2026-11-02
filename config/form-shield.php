@@ -47,6 +47,11 @@ return [
 
     'max_age_seconds' => 43200,
 
+    // Set false (usually on a profile) for a form your app cannot render, such
+    // as one on a customer's own site. The token, expiry and too-fast checks
+    // are skipped and `no_js` never fires. The honeypot still applies.
+    'requires_token' => true,
+
     /*
     |--------------------------------------------------------------------------
     | Scoring
@@ -74,6 +79,9 @@ return [
         'url_in_name' => 3,
         'gibberish' => 2,
         'unexpected_fields' => 2,
+        'excessive_links' => 2,
+        'link_markup' => 3,
+        'blocked_phrase' => 3,
     ],
 
     /*
@@ -153,6 +161,10 @@ return [
         'enabled' => true,
         'model' => 'App\\Models\\User',
         'column' => 'email',
+
+        // Look the sender up with the model's global scopes removed, so a
+        // tenant or soft-delete scope cannot hide an existing customer.
+        'without_global_scopes' => false,
     ],
 
     /*
@@ -164,9 +176,14 @@ return [
     | person can reword and resend. Use multi-word phrases only: every entry
     | is a chance to turn away a paying customer.
     |
+    | For a form that cannot show an error, set `signals` to true. The same
+    | checks then score as the soft signals `excessive_links`, `link_markup`
+    | and `blocked_phrase`, weighted under `weights`.
+    |
     */
 
     'content' => [
+        'signals' => false,
         'max_links' => 2,
         'phrases' => [
             'quality backlinks',
@@ -284,8 +301,8 @@ return [
     |
     | Per-form overrides. Any top-level key above that shapes a verdict can be
     | overridden: threshold, weights (merged), inputs (merged), min_seconds,
-    | max_age_seconds, allowed_fields, allowed_scripts, exemption (merged),
-    | rate_limits (merged) and `signals` (a list of the soft signals to run;
+    | max_age_seconds, requires_token, allowed_fields, allowed_scripts,
+    | exemption (merged), content (merged), rate_limits (merged) and `signals` (a list of the soft signals to run;
     | omit to run all of them).
     |
     */

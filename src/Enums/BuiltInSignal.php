@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Itxshakil\FormShield\Enums;
 
 use Itxshakil\FormShield\Contracts\Signal;
+use Itxshakil\FormShield\Signals\BlockedPhrase;
 use Itxshakil\FormShield\Signals\DisposableEmail;
 use Itxshakil\FormShield\Signals\DuplicatePayload;
+use Itxshakil\FormShield\Signals\ExcessiveLinks;
 use Itxshakil\FormShield\Signals\ForeignScript;
 use Itxshakil\FormShield\Signals\Gibberish;
+use Itxshakil\FormShield\Signals\LinkMarkup;
 use Itxshakil\FormShield\Signals\NoJavaScript;
 use Itxshakil\FormShield\Signals\NoMxRecord;
 use Itxshakil\FormShield\Signals\NoUserAgent;
@@ -32,6 +35,9 @@ enum BuiltInSignal: string
     case Gibberish = 'gibberish';
     case UnexpectedFields = 'unexpected_fields';
     case NoMxRecord = 'no_mx';
+    case ExcessiveLinks = 'excessive_links';
+    case LinkMarkup = 'link_markup';
+    case BlockedPhrase = 'blocked_phrase';
 
     /** @return class-string<Signal> */
     public function signalClass(): string
@@ -46,6 +52,9 @@ enum BuiltInSignal: string
             self::Gibberish => Gibberish::class,
             self::UnexpectedFields => UnexpectedFields::class,
             self::NoMxRecord => NoMxRecord::class,
+            self::ExcessiveLinks => ExcessiveLinks::class,
+            self::LinkMarkup => LinkMarkup::class,
+            self::BlockedPhrase => BlockedPhrase::class,
         };
     }
 }

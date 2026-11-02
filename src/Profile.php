@@ -38,7 +38,7 @@ final class Profile
 
         $overrides = Value::map($profiles[$name] ?? []);
 
-        foreach (['weights', 'inputs', 'exemption', 'rate_limits'] as $mergeable) {
+        foreach (['weights', 'inputs', 'exemption', 'content', 'rate_limits'] as $mergeable) {
             if (isset($overrides[$mergeable]) && is_array($overrides[$mergeable])) {
                 $overrides[$mergeable] = array_replace(
                     is_array($config[$mergeable] ?? null) ? $config[$mergeable] : [],

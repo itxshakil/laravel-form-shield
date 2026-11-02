@@ -9,6 +9,10 @@ use Illuminate\Database\Schema\Blueprint;
 /**
  * Registers `$table->spamColumns()` and `$table->dropSpamColumns()`.
  *
+ * Pass `false` to both for a table whose `is_spam` index is built elsewhere,
+ * such as concurrently in its own migration. The drop takes the same flag
+ * rather than asking the database, so it never guesses.
+ *
  * @internal
  */
 final class SpamColumns
@@ -17,9 +21,14 @@ final class SpamColumns
 
     public static function register(): void
     {
-        Blueprint::macro('spamColumns', function (): void {
+        Blueprint::macro('spamColumns', function (bool $index = true): void {
             /** @var Blueprint $this */
-            $this->boolean('is_spam')->default(false)->index();
+            $column = $this->boolean('is_spam')->default(false);
+
+            if ($index) {
+                $column->index();
+            }
+
             $this->string('spam_reason', 64)->nullable();
             $this->unsignedSmallInteger('spam_score')->default(0);
             $this->json('spam_signals')->nullable();
@@ -28,9 +37,12 @@ final class SpamColumns
             $this->string('reviewed_by')->nullable();
         });
 
-        Blueprint::macro('dropSpamColumns', function (): void {
+        Blueprint::macro('dropSpamColumns', function (bool $index = true): void {
             /** @var Blueprint $this */
-            $this->dropIndex(['is_spam']);
+            if ($index) {
+                $this->dropIndex(['is_spam']);
+            }
+
             $this->dropColumn(SpamColumns::COLUMNS);
         });
     }
