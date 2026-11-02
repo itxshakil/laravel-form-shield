@@ -6,6 +6,10 @@ php artisan form-shield:report "App\Models\Inquiry" --days=90 --profile=contact
 php artisan form-shield:report          # the built-in form_shield_submissions log
 ```
 
+If your model hides quarantined rows behind a global scope, pass `--without-global-scopes`.
+Without it the report reads only the rows the scope lets through, so it never sees the spam it is meant to measure.
+The flag removes every global scope on the model, including a tenant or soft-delete scope, so run it where that is safe.
+
 ## Reading it
 
 | Column | Meaning |

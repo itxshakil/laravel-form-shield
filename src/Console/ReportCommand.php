@@ -32,7 +32,8 @@ final class ReportCommand extends Command
     protected $signature = 'form-shield:report
         {model? : The Eloquent model that stores submissions (uses HasSpamVerdict). Defaults to the built-in log}
         {--days=30 : How far back to measure}
-        {--profile=default : Profile whose weights are shown}';
+        {--profile=default : Profile whose weights are shown}
+        {--without-global-scopes : Read every row, even ones a global scope on the model hides}';
 
     protected $description = 'Per-signal spam detection precision, measured against human review labels';
 
@@ -91,7 +92,10 @@ final class ReportCommand extends Command
 
         // Chunked, not get(): every submission writes a row and nothing prunes
         // by default, so the window has no upper bound. One pass fills every tally.
+        // --without-global-scopes is for a model whose scope hides quarantined
+        // rows: without it, the report would see only the clean ones.
         $model::query()
+            ->when((bool) $this->option('without-global-scopes'), static fn ($query) => $query->withoutGlobalScopes())
             ->where($instance->qualifyColumn($instance->getCreatedAtColumn() ?? 'created_at'), '>=', $since)
             ->select([$instance->getKeyName(), 'is_spam', 'spam_reason', 'spam_score', 'spam_signals', 'spam_source', 'reviewed_at'])
             ->chunkById(1000, function ($rows): void {
