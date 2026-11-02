@@ -74,6 +74,19 @@ php artisan form-shield:columns inquiries
 php artisan migrate
 ```
 
+**Upgrading to 1.1.** If you published the config earlier and turn on `content.signals`, add the three content signal weights to `weights` (or to the profile's `weights`), or the signals will score 0:
+
+```php
+'weights' => [
+    // ...
+    'excessive_links' => 2,
+    'link_markup' => 3,
+    'blocked_phrase' => 3,
+],
+```
+
+See [Content signals](docs/signals.md#content-signals).
+
 Add `--no-index` if you build the `is_spam` index yourself, for example concurrently.
 
 Then add the trait to the model:

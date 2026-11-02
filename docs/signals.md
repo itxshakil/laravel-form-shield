@@ -69,5 +69,20 @@ Set `content.signals` to `true` and the same three checks run as soft signals in
 They are registered like any other soft signal, so a profile's `signals` list and `weights` apply to them.
 They are off by default, which is the behaviour of v1.
 
-The rule and the signals share one implementation (`Itxshakil\FormShield\Support\Content`), so they always agree about what counts as a link, as markup or as a blocked phrase.
+If you published the config before v1.1, it has no weights for these signals.
+A signal without a weight records 0, adds nothing to the score and disappears from `form-shield:report`.
+Add the three weights (2, 3 and 3) to `weights`, or to the `weights` of the profile that turns the signals on:
+
+```php
+'weights' => [
+    // ...
+    'excessive_links' => 2,
+    'link_markup' => 3,
+    'blocked_phrase' => 3,
+],
+```
+
+The rule and the signals share one implementation (`Itxshakil\FormShield\Support\Content`), so they agree about what counts as a link, as markup or as a blocked phrase.
+The rule reads the top-level `content` config, while the signals read the profile's merged `content`.
+A profile override of `max_links` or `phrases` therefore affects the signals only.
 Reading `content` from a profile merges it with the top-level values, so a profile can turn the signals on without repeating the phrase list.

@@ -365,7 +365,6 @@ final class InspectorTest extends TestCase
 
         self::assertTrue($verdict->passes());
         self::assertSame([], $verdict->signals);
-        self::assertArrayNotHasKey('no_js', $verdict->signals);
     }
 
     #[Test]
