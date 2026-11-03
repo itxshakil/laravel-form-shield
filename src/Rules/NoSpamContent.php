@@ -6,6 +6,7 @@ namespace Itxshakil\FormShield\Rules;
 
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Itxshakil\FormShield\Support\Content;
 use Itxshakil\FormShield\Support\Value;
 
 /**
@@ -51,28 +52,22 @@ final class NoSpamContent implements ValidationRule
 
         $maxLinks = $this->maxLinks ?? Value::int(config('form-shield.content.max_links'), 2);
 
-        if (preg_match_all('~(https?://|www\.)\S+~i', $value) > $maxLinks) {
+        if (Content::links($value) > $maxLinks) {
             $fail('form-shield::messages.too_many_links')->translate(['max' => $maxLinks]);
 
             return;
         }
 
-        if (preg_match('~(<a\s[^>]*href|\[url[=\]]|\[link[=\]])~i', $value) === 1) {
+        if (Content::hasMarkup($value)) {
             $fail('form-shield::messages.link_markup')->translate();
 
             return;
         }
 
-        $haystack = mb_strtolower($value);
+        $phrases = $this->phrases ?? Value::strings(config('form-shield.content.phrases'));
 
-        foreach ($this->phrases ?? Value::strings(config('form-shield.content.phrases')) as $phrase) {
-            $phrase = mb_strtolower(trim($phrase));
-
-            if ($phrase !== '' && str_contains($haystack, $phrase)) {
-                $fail('form-shield::messages.blocked_phrase')->translate();
-
-                return;
-            }
+        if (Content::blockedPhrase($value, $phrases) !== null) {
+            $fail('form-shield::messages.blocked_phrase')->translate();
         }
     }
 }

@@ -13,6 +13,7 @@ use Itxshakil\FormShield\Facades\FormShield;
 use Itxshakil\FormShield\Profile;
 use Itxshakil\FormShield\Submission;
 use Itxshakil\FormShield\Tests\Concerns\CreatesTables;
+use Itxshakil\FormShield\Tests\Fixtures\ScopedUser;
 use Itxshakil\FormShield\Tests\Fixtures\User;
 use Itxshakil\FormShield\Tests\TestCase;
 use Itxshakil\FormShield\Verdict;
@@ -347,6 +348,97 @@ final class InspectorTest extends TestCase
         $this->inspect($this->humanPayload(['fax_number' => 'x']));
 
         Event::assertNothingDispatched();
+    }
+
+    /** @return array<string, mixed> */
+    private function tokenlessPayload(): array
+    {
+        return ['name' => 'Jane Doe', 'email' => 'jane@example.com', 'message' => 'Hello, I would like a quote for hosting my small business website.'];
+    }
+
+    #[Test]
+    public function a_tokenless_profile_skips_timing_and_no_js(): void
+    {
+        config()->set('form-shield.profiles.embedded', ['requires_token' => false]);
+
+        $verdict = $this->inspect($this->tokenlessPayload(), 'embedded');
+
+        self::assertTrue($verdict->passes());
+        self::assertSame([], $verdict->signals);
+    }
+
+    #[Test]
+    public function a_tokenless_profile_still_honours_a_filled_honeypot(): void
+    {
+        config()->set('form-shield.profiles.embedded', ['requires_token' => false]);
+
+        $verdict = $this->inspect($this->tokenlessPayload() + ['fax_number' => '555-0100'], 'embedded');
+
+        self::assertTrue($verdict->isSpam);
+        self::assertSame('honeypot', $verdict->reason);
+    }
+
+    #[Test]
+    public function the_default_profile_still_requires_a_token(): void
+    {
+        self::assertSame('no_token', $this->inspect($this->tokenlessPayload())->reason);
+
+        config()->set('form-shield.profiles.embedded', ['requires_token' => false]);
+
+        self::assertSame('no_token', $this->inspect($this->tokenlessPayload())->reason);
+    }
+
+    #[Test]
+    public function the_exemption_can_ignore_global_scopes(): void
+    {
+        User::query()->create(['email' => 'customer@example.com']);
+        config()->set('form-shield.exemption.model', ScopedUser::class);
+        $payload = $this->humanPayload(['email' => 'customer@example.com', '_fs_js' => '']);
+
+        self::assertSame(['no_js' => 2], $this->inspect($payload)->signals);
+
+        config()->set('form-shield.exemption.without_global_scopes', true);
+
+        self::assertSame(['known_sender' => 0], $this->inspect($payload)->signals);
+    }
+
+    #[Test]
+    public function content_signals_are_off_by_default(): void
+    {
+        $message = 'See https://a.test https://b.test https://c.test and <a href="https://d.test">this</a>, quality backlinks for you.';
+
+        $verdict = $this->inspect($this->humanPayload(['message' => $message]));
+
+        self::assertSame([], $verdict->signals);
+    }
+
+    #[Test]
+    public function content_signals_score_when_on(): void
+    {
+        config()->set('form-shield.content.signals', true);
+
+        $links = $this->inspect($this->humanPayload(['message' => 'See https://a.test https://b.test https://c.test please.']));
+        self::assertSame(['excessive_links' => 2], $links->signals);
+
+        $markup = $this->inspect($this->humanPayload(['message' => 'I wrote [url=https://a.test]this[/url] for you.']));
+        self::assertSame(['link_markup' => 3], $markup->signals);
+
+        $phrase = $this->inspect($this->humanPayload(['message' => 'We offer Quality Backlinks at a fair price.']));
+        self::assertSame(['blocked_phrase' => 3], $phrase->signals);
+
+        $all = $this->inspect($this->humanPayload(['message' => 'Quality backlinks <a href="https://a.test">a</a> https://b.test https://c.test https://d.test']));
+        self::assertTrue($all->isSpam);
+        self::assertSame(['excessive_links' => 2, 'link_markup' => 3, 'blocked_phrase' => 3], $all->signals);
+    }
+
+    #[Test]
+    public function a_profile_can_turn_content_signals_on_without_repeating_the_phrases(): void
+    {
+        config()->set('form-shield.profiles.embedded', ['requires_token' => false, 'content' => ['signals' => true]]);
+
+        $verdict = $this->inspect(['message' => 'We offer quality backlinks at a fair price.'], 'embedded');
+
+        self::assertSame(['blocked_phrase' => 3], $verdict->signals);
     }
 
     #[Test]

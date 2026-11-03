@@ -7,6 +7,7 @@ namespace Itxshakil\FormShield\Tests\Feature;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Itxshakil\FormShield\Tests\Concerns\CreatesTables;
+use Itxshakil\FormShield\Tests\Fixtures\HidingInquiry;
 use Itxshakil\FormShield\Tests\Fixtures\Inquiry;
 use Itxshakil\FormShield\Tests\Fixtures\User;
 use Itxshakil\FormShield\Tests\TestCase;
@@ -94,6 +95,21 @@ final class ReportCommandTest extends TestCase
         $this->store(Verdict::flagged('score', ['no_js' => 2, 'duplicate' => 3], 5));
 
         self::assertStringContainsString('No reviewed rows yet', $this->report());
+    }
+
+    #[Test]
+    public function it_reads_rows_a_global_scope_hides_only_when_asked(): void
+    {
+        $this->store(Verdict::flagged('honeypot'), true);
+        $this->store(Verdict::flagged('score', ['no_js' => 2, 'duplicate' => 3], 5));
+
+        self::assertStringContainsString('No submissions in the last 30 days', $this->report(HidingInquiry::class));
+
+        $output = $this->report(HidingInquiry::class, ['--without-global-scopes' => true]);
+
+        self::assertMatchesRegularExpression('/honeypot\s*\|\s*hard\s*\|\s*1\s*\|\s*1\s*\|\s*0\s*\|\s*100\.0%/', $output);
+        self::assertMatchesRegularExpression('/Quarantined:\s+2/', $output);
+        self::assertMatchesRegularExpression('/Reviewed:\s+1/', $output);
     }
 
     #[Test]

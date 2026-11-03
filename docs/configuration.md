@@ -44,8 +44,8 @@ FORM_SHIELD_STORE=true               # log every inspection to form_shield_submi
 | Command | What it does |
 |---|---|
 | `form-shield:install [--table=] [--log] [--migrate] [--force]` | Publishes the config and sets up verdict storage. |
-| `form-shield:columns {table} [--migrate]` | Writes a migration adding the spam columns to an existing table. |
-| `form-shield:report [model] [--days=30] [--profile=default]` | Precision per signal against reviewed rows. With no model, it reports on the built-in log. |
+| `form-shield:columns {table} [--migrate] [--no-index]` | Writes a migration adding the spam columns to an existing table. `--no-index` leaves out the `is_spam` index. |
+| `form-shield:report [model] [--days=30] [--profile=default] [--without-global-scopes]` | Precision per signal against reviewed rows. With no model, it reports on the built-in log. |
 
 ## Publishing other resources
 

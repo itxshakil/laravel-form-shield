@@ -33,11 +33,23 @@ Schema::create('inquiries', function (Blueprint $table) {
 $table->dropSpamColumns();
 ```
 
+Pass `false` to leave out the `is_spam` index, for a large table whose index you build concurrently in its own migration:
+
+```php
+$table->spamColumns(false);
+
+// down()
+$table->dropSpamColumns(false);
+```
+
+`form-shield:columns inquiries --no-index` writes a migration that does exactly this.
+The drop takes the same flag instead of asking the database, so the two calls stay symmetrical.
+
 `spamColumns()` adds:
 
 | Column | Type |
 |---|---|
-| `is_spam` | boolean, indexed, default false |
+| `is_spam` | boolean, indexed (unless you pass `false`), default false |
 | `spam_reason` | string(64), nullable |
 | `spam_score` | unsigned small int, default 0 |
 | `spam_signals` | json, nullable |
